@@ -6,6 +6,7 @@ from typing import Tuple
 from cameraMatrix import cameraMatrix
 from lightSource import lightSource
 from object import object
+from parametricPlane import parametricPlane
 
 class tessel:
 
@@ -40,24 +41,22 @@ class tessel:
 
                     p_a, p_d, p_s, f = object.getReflectance()
                     #If surface is not a back face
-                    if int(N.get(2, 0)) >= 0:
+                    if int((N.transpose() * V).get(0, 0)) >= 0:
                     	#Compute face shading 
                         I_d = max(0, (S.removeRow(3).transpose() * N.removeRow(3)).get(0, 0) / (S.removeRow(3).norm() * N.removeRow(3).norm()))
                         I_s = max(0, (R.removeRow(3).transpose() * V.removeRow(3)).get(0, 0) / (R.removeRow(3).norm() * V.removeRow(3).norm()))
 
                         shading_coeff = (p_a + p_d * I_d + p_s * I_s ** f)
                         shading_color = [int(shading_coeff*c) for c in object.getColor()]
-                    else:
-                        shading_color = [int(p_a*c) for c in object.getColor()]
 
-                    shading_color = tuple(shading_color)
+                        shading_color = tuple(shading_color)
 
-                    #Transform 3D points expressed in viewing coordinates into 2D pixel coordinates
-                    facePointsPixel = [camera.viewingToPixelCoordinates(fp) for fp in facePoints]
+                        #Transform 3D points expressed in viewing coordinates into 2D pixel coordinates
+                        facePointsPixel = [camera.viewingToPixelCoordinates(fp) for fp in facePoints]
 
-                    #Add the surface to the face list. Each list element is composed of the following items:
-                    #[depth of the face centroid point (its Z coordinate), list of face points in pixel coordinates, face shading]
-                    self.__faceList.append((C.get(2, 0), facePointsPixel, shading_color))
+                        #Add the surface to the face list. Each list element is composed of the following items:
+                        #[depth of the face centroid point (its Z coordinate), list of face points in pixel coordinates, face shading]
+                        self.__faceList.append((C.get(2, 0), facePointsPixel, shading_color))
 
                     v += object.getUVDelta()[1]
                 u += object.getUVDelta()[0]
