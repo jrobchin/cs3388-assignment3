@@ -40,15 +40,17 @@ class tessel:
 
                     p_a, p_d, p_s, f = object.getReflectance()
                     #If surface is not a back face
-                    if N.get(2, 0) >= -1:
+                    if int(N.get(2, 0)) >= 0:
                     	#Compute face shading 
                         I_d = max(0, (S.removeRow(3).transpose() * N.removeRow(3)).get(0, 0) / (S.removeRow(3).norm() * N.removeRow(3).norm()))
                         I_s = max(0, (R.removeRow(3).transpose() * V.removeRow(3)).get(0, 0) / (R.removeRow(3).norm() * V.removeRow(3).norm()))
 
                         shading_coeff = (p_a + p_d * I_d + p_s * I_s ** f)
-                        shading_color = tuple([int(shading_coeff*c) for c in object.getColor()])
-                    # else:
-                    #     shading_color = (0, 128, min(255, int(255 + 255*N.get(2, 0))))
+                        shading_color = [int(shading_coeff*c) for c in object.getColor()]
+                    else:
+                        shading_color = [int(p_a*c) for c in object.getColor()]
+
+                    shading_color = tuple(shading_color)
 
                     #Transform 3D points expressed in viewing coordinates into 2D pixel coordinates
                     facePointsPixel = [camera.viewingToPixelCoordinates(fp) for fp in facePoints]
@@ -69,15 +71,11 @@ class tessel:
  
     def __vectorNormal(self,facePoints):
         #Returns the column matrix containing the normal vector to the face.
-        # Find non-zero normal
-        for i in range(4):
-            a = facePoints[i] - facePoints[(i+1)%4]
-            b = facePoints[(i+2)%4] - facePoints[(i+1)%4]
-            a = a.removeRow(3).transpose()
-            b = b.removeRow(3).transpose()
-            normal = -a.crossProduct(b).transpose()
-            if normal.norm() != 0:
-                break
+        a = facePoints[0] - facePoints[2]
+        b = facePoints[1] - facePoints[3]
+        a = a.removeRow(3).transpose()
+        b = b.removeRow(3).transpose()
+        normal = a.crossProduct(b).transpose()
         return normal.insertRow(3, 1)
 
     def __vectorToLightSource(self,L,C):
