@@ -5,11 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run assignment.",
+            "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/Assign3.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
